@@ -24,20 +24,39 @@ class MyWindow(QtWidgets.QMainWindow):
         self._set_timer(method=self._change_label_time, timeout=1000)
 
     def _set_timer(self, method, timeout):
+        """
+        Function make QTimer for other method
+
+        :param method: method you want to call
+        :param timeout: timeout in ms
+        :return: None
+        """
         timer = QTimer(self)
         timer.timeout.connect(method)
         timer.start(timeout)
 
     def _change_label_time(self):
+        """
+        Function change label with time
+        :return: None
+        """
         self.ui.label.setText(self._get_time())
 
-    def _get_time(self):
-        current_time = QTime.currentTime()
-        return current_time.toString('hh:mm:ss')
-
     def _make_background_transparent(self):
+        """
+        Function make background of program transparent
+        :return: None
+        """
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+
+    @staticmethod
+    def _get_time():
+        """
+        :return: current time
+        """
+        current_time = QTime.currentTime()
+        return current_time.toString('hh:mm:ss')
 
 
 app = QtWidgets.QApplication([])
