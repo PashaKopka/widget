@@ -1,30 +1,49 @@
-from kivy.core.window import Window
-from kivy.app import App
-from kivy.uix.label import Label
-from kivy.clock import Clock
+import os
 import time
 
-from kivy.uix.widget import Widget
+from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtCore import QTime, QTimer
+from ui.mydesign import Ui_Form
+from PyQt5 import QtWidgets, uic
+import sys
 
-Window.size = (500, 300)
-Window.borderless = True
-Window.allow_screensaver = True
-
-
-class TimeLabel(Label):
-    def update(self, *args):
-        self.text = time.strftime('%H:%M:%S')
-        self.font_size = 100
+MAIN_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 
 
-class WidgetApp(App, Widget):
+class MyWindow(QtWidgets.QMainWindow):
 
-    def build(self):
-        curent_time = TimeLabel()
-        Clock.schedule_interval(curent_time.update, 1)
-        return curent_time
+    def __init__(self):
+        super(MyWindow, self).__init__()
+        self.ui = Ui_Form()
+        self.ui.setupUi(self)
+
+        self._make_background_transparent()
+
+        self.ui.label.setText(self._get_time())
+
+        self._set_timer(method=self._change_label_time, timeout=1000)
+
+    def _set_timer(self, method, timeout):
+        timer = QTimer(self)
+        timer.timeout.connect(method)
+        timer.start(timeout)
+
+    def _change_label_time(self):
+        self.ui.label.setText(self._get_time())
+
+    def _get_time(self):
+        current_time = QTime.currentTime()
+        return current_time.toString('hh:mm:ss')
+
+    def _make_background_transparent(self):
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
 
-if __name__ == '__main__':
-    app = WidgetApp()
-    app.run()
+app = QtWidgets.QApplication([])
+win = uic.loadUi(os.path.join(MAIN_DIRECTORY, 'ui/main.ui'))
+
+application = MyWindow()
+application.show()
+
+sys.exit(app.exec())
