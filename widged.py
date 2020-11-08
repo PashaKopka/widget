@@ -1,32 +1,22 @@
-import os
-import time
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import QTimer, Qt
+from PyQt5 import QtWidgets
 
+import os
 import pyvda
-from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import QTime, QTimer, Qt
-from ui.mydesign import Ui_Form
-from PyQt5 import QtWidgets, uic
-import sys
 import win32gui
 
-MAIN_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+import settings
 
 
-class MyWindow(QtWidgets.QMainWindow):
+class BaseWidget(QtWidgets.QMainWindow):
 
     def __init__(self):
-        super(MyWindow, self).__init__()
-        self.ui = Ui_Form()
-        self.ui.setupUi(self)
-
-        self.ui.label.mouseMoveEvent = self._move_window
+        super(BaseWidget, self).__init__()
         self._normalize_window()
-        self.ui.label.setText(self._get_time())
-        self._set_timer(method=self._change_label_time, timeout=1000)
-
         self._stay_at_all_virtual_descktops()
 
-    def _move_window(self, e):
+    def move_window(self, e):
         """
         Function for moving window
         :param e: -
@@ -45,7 +35,7 @@ class MyWindow(QtWidgets.QMainWindow):
         """
         self.click_position = a0.globalPos()
 
-    def _set_timer(self, method, timeout):
+    def set_timer(self, method, timeout):
         """
         Function make QTimer for other method
 
@@ -56,13 +46,6 @@ class MyWindow(QtWidgets.QMainWindow):
         timer = QTimer(self)
         timer.timeout.connect(method)
         timer.start(timeout)
-
-    def _change_label_time(self):
-        """
-        Function change label with time
-        :return: None
-        """
-        self.ui.label.setText(self._get_time())
 
     def _normalize_window(self):
         """
@@ -86,20 +69,3 @@ class MyWindow(QtWidgets.QMainWindow):
         current_desktop = pyvda.GetCurrentDesktopNumber()
         current_window_handle = win32gui.GetForegroundWindow()
         pyvda.MoveWindowToDesktopNumber(current_window_handle, current_desktop)
-
-    @staticmethod
-    def _get_time():
-        """
-        :return: current time
-        """
-        current_time = QTime.currentTime()
-        return current_time.toString('hh:mm:ss')
-
-
-app = QtWidgets.QApplication([])
-win = uic.loadUi(os.path.join(MAIN_DIRECTORY, 'ui/main.ui'))
-
-application = MyWindow()
-application.show()
-
-sys.exit(app.exec())
