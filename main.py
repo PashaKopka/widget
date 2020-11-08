@@ -19,7 +19,7 @@ class MyWindow(QtWidgets.QMainWindow):
 
         self.ui.label.mouseMoveEvent = self._move_window
 
-        self._make_background_transparent()
+        self._normalize_window()
 
         self.ui.label.setText(self._get_time())
 
@@ -53,12 +53,16 @@ class MyWindow(QtWidgets.QMainWindow):
         """
         self.ui.label.setText(self._get_time())
 
-    def _make_background_transparent(self):
+    def _normalize_window(self):
         """
         Function make background of program transparent
+        and set window always on bottom
         :return: None
         """
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setWindowFlags(
+            QtCore.Qt.FramelessWindowHint |
+            QtCore.Qt.WindowStaysOnBottomHint
+        )
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
     @staticmethod
