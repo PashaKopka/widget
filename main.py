@@ -2,7 +2,7 @@ import os
 import time
 
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import QTime, QTimer
+from PyQt5.QtCore import QTime, QTimer, Qt
 from ui.mydesign import Ui_Form
 from PyQt5 import QtWidgets, uic
 import sys
@@ -17,11 +17,22 @@ class MyWindow(QtWidgets.QMainWindow):
         self.ui = Ui_Form()
         self.ui.setupUi(self)
 
+        self.ui.label.mouseMoveEvent = self._move_window
+
         self._make_background_transparent()
 
         self.ui.label.setText(self._get_time())
 
         self._set_timer(method=self._change_label_time, timeout=1000)
+
+    def _move_window(self, e):
+        if not self.isMaximized() and e.buttons() == Qt.LeftButton:
+            self.move(self.pos() + e.globalPos() - self.click_position)
+            self.click_position = e.globalPos()
+            e.accept()
+
+    def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
+        self.click_position = a0.globalPos()
 
     def _set_timer(self, method, timeout):
         """
