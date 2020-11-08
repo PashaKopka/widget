@@ -5,6 +5,7 @@ from PyQt5 import QtWidgets
 import os
 import pyvda
 import win32gui
+from PyQt5.QtWidgets import QMenu
 
 import settings
 
@@ -13,6 +14,8 @@ class BaseWidget(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(BaseWidget, self).__init__()
+        self.draggable = True
+
         self._normalize_window()
         self._stay_at_all_virtual_descktops()
 
@@ -22,7 +25,7 @@ class BaseWidget(QtWidgets.QMainWindow):
         :param e: -
         :return: None
         """
-        if not self.isMaximized() and e.buttons() == Qt.LeftButton:
+        if not self.isMaximized() and e.buttons() == Qt.LeftButton and self.draggable:
             self.move(self.pos() + e.globalPos() - self.click_position)
             self.click_position = e.globalPos()
             e.accept()
@@ -69,3 +72,21 @@ class BaseWidget(QtWidgets.QMainWindow):
         current_desktop = pyvda.GetCurrentDesktopNumber()
         current_window_handle = win32gui.GetForegroundWindow()
         pyvda.MoveWindowToDesktopNumber(current_window_handle, current_desktop)
+
+    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+        """
+        Function toggle draggable of window
+        :param event: choice button of context menu
+        :return:
+        """
+        menu = QMenu(self)
+        if self.draggable:
+            pin_action = menu.addAction("pin")
+            action = menu.exec_(self.mapToGlobal(event.pos()))
+            if action == pin_action:
+                self.draggable = False
+        else:
+            pin_action = menu.addAction("unpin")
+            action = menu.exec_(self.mapToGlobal(event.pos()))
+            if action == pin_action:
+                self.draggable = True

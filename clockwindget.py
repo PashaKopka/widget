@@ -1,12 +1,12 @@
 import sys
 
 from PyQt5.QtCore import QTime
+from PyQt5.QtWidgets import QMenu
+
 from widget.ui.clock_design import Ui_Form
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets
 
 from widget.widged import BaseWidget
-
-import os
 
 import settings
 
@@ -40,7 +40,6 @@ class ClockWidget(BaseWidget):
 
 
 app = QtWidgets.QApplication([])
-# win = uic.loadUi(os.path.join(settings.MAIN_DIRECTORY, 'widget\\ui\\clock_design.ui'))
 
 application = ClockWidget()
 application.show()
