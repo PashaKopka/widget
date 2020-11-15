@@ -36,7 +36,7 @@
         <item>
          <layout class="QVBoxLayout" name="widgets_layout">
           <item>
-           <widget class="QCheckBox" name="checkBox">
+           <widget class="QCheckBox" name="clock_checkbox">
             <property name="minimumSize">
              <size>
               <width>0</width>
