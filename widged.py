@@ -2,12 +2,9 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5 import QtWidgets
 
-import os
 import pyvda
 import win32gui
 from PyQt5.QtWidgets import QMenu
-
-import settings
 
 
 class BaseWidget(QtWidgets.QMainWindow):

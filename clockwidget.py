@@ -1,14 +1,11 @@
 import sys
 
 from PyQt5.QtCore import QTime
-from PyQt5.QtWidgets import QMenu
 
 from widget.ui.clock_design import Ui_Form
 from PyQt5 import QtWidgets
 
 from widget.widged import BaseWidget
-
-import settings
 
 
 class ClockWidget(BaseWidget):
