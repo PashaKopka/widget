@@ -14,10 +14,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(716, 360)
+        Form.resize(754, 264)
         Form.setStyleSheet("background-color: transparent;")
         self.label = QtWidgets.QLabel(Form)
-        self.label.setGeometry(QtCore.QRect(50, 30, 631, 221))
+        self.label.setGeometry(QtCore.QRect(10, 20, 721, 221))
         font = QtGui.QFont()
         font.setPointSize(100)
         self.label.setFont(font)

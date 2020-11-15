@@ -39,9 +39,10 @@ class ClockWidget(BaseWidget):
         return current_time.toString('hh:mm:ss')
 
 
-app = QtWidgets.QApplication([])
+if __name__ == '__main__':
+    app = QtWidgets.QApplication([])
 
-application = ClockWidget()
-application.show()
+    application = ClockWidget()
+    application.show()
 
-sys.exit(app.exec())
+    sys.exit(app.exec())
