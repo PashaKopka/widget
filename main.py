@@ -12,6 +12,11 @@ from widget.widged import BaseWidget
 
 
 class NewWidget(BaseWidget):
+    """
+    This class is for creating new widget from compiled py-file
+    command:
+        $ pyuic5 design.ui -o design.py
+    """
 
     def __init__(self, design_ui):
         super().__init__()
@@ -21,26 +26,14 @@ class NewWidget(BaseWidget):
         self.ui.label.mouseMoveEvent = self.move_window
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class WidgetAdder:
+    """
+    This class add button for displaying widget to main window
+    and adding functions for their processing
+    """
 
-    def __init__(self):
-        super().__init__()
-        self.click_time = time.time()
-
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.setWindowTitle('Widget Manager')
-
-        self.ui.add_widget_button.clicked.connect(self.add_widget)
-
-        self.clock_widget = ClockWidget()
-        self.ui.clock_widget_button.clicked.connect(lambda: self.check(self.clock_widget))
-
-    def check(self, widget):
-        if (time.time() - self.click_time) < .5:
-            self.display_widget(widget)
-        else:
-            self.click_time = time.time()
+    def __init__(self, main_window_obj):
+        self.main_window_obj = main_window_obj
 
     def add_widget(self):
         """
@@ -52,10 +45,21 @@ class MainWindow(QtWidgets.QMainWindow):
         widget = self.create_widget(filename, path)
 
         button = QPushButton(filename)
-        button.clicked.connect(lambda: self.check(widget))
+        button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget))
         button.setFont(QFont('MS Shell Dlg 2', 14))
+        self.main_window_obj.ui.widgets_layout.addWidget(button)
 
-        self.ui.widgets_layout.addWidget(button)
+    @staticmethod
+    def get_file_name():
+        """
+        This function return data of the file
+        :return: filename and path to file
+        """
+        path = QFileDialog.getOpenFileName()
+        filename = path[0].split('/')
+        filename = filename[-1].split('.')
+        filename = filename[0]
+        return filename, path[0]
 
     @staticmethod
     def create_widget(filename, path):
@@ -73,6 +77,34 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return NewWidget(module.Ui_Form)
 
+
+class MainWindow(QtWidgets.QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+        self.click_time = time.time()
+        self.widget_adder = WidgetAdder(main_window_obj=self)
+
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.setWindowTitle('Widget Manager')
+
+        self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
+
+        self.clock_widget = ClockWidget()
+        self.ui.clock_widget_button.clicked.connect(lambda: self.double_click_event(self.clock_widget))
+
+    def double_click_event(self, widget):
+        """
+        This function check: is click double or not
+        :param widget: widget, that will be displayed
+        :return:
+        """
+        if (time.time() - self.click_time) < .5:
+            self.display_widget(widget)
+        else:
+            self.click_time = time.time()
+
     @staticmethod
     def display_widget(widget: BaseWidget):
         """
@@ -84,18 +116,6 @@ class MainWindow(QtWidgets.QMainWindow):
             widget.show()
         else:
             widget.hide()
-
-    @staticmethod
-    def get_file_name():
-        """
-        This function return data of the file
-        :return: filename and path to file
-        """
-        path = QFileDialog.getOpenFileName()
-        filename = path[0].split('/')
-        filename = filename[-1].split('.')
-        filename = filename[0]
-        return filename, path[0]
 
 
 app = QtWidgets.QApplication([])
