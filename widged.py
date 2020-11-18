@@ -1,10 +1,11 @@
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QMenu
 
+import PyQt5
 import pyvda
 import win32gui
-from PyQt5.QtWidgets import QMenu
 
 
 class BaseWidget(QtWidgets.QMainWindow):
@@ -12,6 +13,13 @@ class BaseWidget(QtWidgets.QMainWindow):
     def __init__(self):
         super(BaseWidget, self).__init__()
         self.draggable = True
+
+        self.menu = QMenu(self)
+        self.actions = {
+            'move center': self.move_window_center,
+            'pin': self.pin
+        }
+        self._create_context_menu()
 
         self._normalize_window()
         self._stay_at_all_virtual_descktops()
@@ -26,6 +34,20 @@ class BaseWidget(QtWidgets.QMainWindow):
             self.move(self.pos() + e.globalPos() - self.click_position)
             self.click_position = e.globalPos()
             e.accept()
+
+    def pin(self):
+        if self.draggable:
+            self.draggable = False
+        else:
+            self.draggable = True
+
+    def move_window_center(self):
+        frameGm = self.frameGeometry()
+        screen = PyQt5.QtWidgets.QApplication.desktop().screenNumber(
+            PyQt5.QtWidgets.QApplication.desktop().cursor().pos())
+        centerPoint = PyQt5.QtWidgets.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
 
     def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
         """
@@ -70,20 +92,20 @@ class BaseWidget(QtWidgets.QMainWindow):
         current_window_handle = win32gui.GetForegroundWindow()
         pyvda.MoveWindowToDesktopNumber(current_window_handle, current_desktop)
 
+    def _create_context_menu(self):
+        """
+        This function create actions for context menu
+        :return:
+        """
+        for action in self.actions:
+            self.menu.addAction(action)
+
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
         """
         Function toggle draggable of window
         :param event: choice button of context menu
         :return:
         """
-        menu = QMenu(self)
-        if self.draggable:
-            pin_action = menu.addAction("pin")
-            action = menu.exec_(self.mapToGlobal(event.pos()))
-            if action == pin_action:
-                self.draggable = False
-        else:
-            pin_action = menu.addAction("unpin")
-            action = menu.exec_(self.mapToGlobal(event.pos()))
-            if action == pin_action:
-                self.draggable = True
+        action = self.menu.exec_(self.mapToGlobal(event.pos()))
+        if action:
+            self.actions[action.text()]()

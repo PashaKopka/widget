@@ -1,9 +1,10 @@
+import time
 import sys
 import importlib.util
 
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QFileDialog, QCheckBox
+from PyQt5.QtWidgets import QFileDialog, QPushButton
 
 from widget.ui.main_design import Ui_MainWindow
 from widget.clockwidget import ClockWidget
@@ -17,12 +18,14 @@ class NewWidget(BaseWidget):
 
         self.ui = design_ui()
         self.ui.setupUi(self)
+        self.ui.label.mouseMoveEvent = self.move_window
 
 
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.click_time = time.time()
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -31,7 +34,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.add_widget_button.clicked.connect(self.add_widget)
 
         self.clock_widget = ClockWidget()
-        self.ui.clock_checkbox.clicked.connect(lambda: self.display_widget(self.ui.clock_checkbox, self.clock_widget))
+        self.ui.clock_widget_button.clicked.connect(lambda: self.check(self.clock_widget))
+
+    def check(self, widget):
+        if (time.time() - self.click_time) < .5:
+            self.display_widget(widget)
+        else:
+            self.click_time = time.time()
 
     def add_widget(self):
         """
@@ -42,11 +51,11 @@ class MainWindow(QtWidgets.QMainWindow):
         filename, path = self.get_file_name()
         widget = self.create_widget(filename, path)
 
-        checkbox = QCheckBox(filename)
-        checkbox.clicked.connect(lambda: self.display_widget(checkbox, widget))
-        checkbox.setFont(QFont('MS Shell Dlg 2', 14))
+        button = QPushButton(filename)
+        button.clicked.connect(lambda: self.check(widget))
+        button.setFont(QFont('MS Shell Dlg 2', 14))
 
-        self.ui.widgets_layout.addWidget(checkbox)
+        self.ui.widgets_layout.addWidget(button)
 
     @staticmethod
     def create_widget(filename, path):
@@ -65,14 +74,13 @@ class MainWindow(QtWidgets.QMainWindow):
         return NewWidget(module.Ui_Form)
 
     @staticmethod
-    def display_widget(checkbox: QCheckBox, widget: BaseWidget):
+    def display_widget(widget: BaseWidget):
         """
         display the widget on users screen
-        :param checkbox: just checkbox
         :param widget: widget, that will be displayed
         :return: None
         """
-        if checkbox.isChecked():
+        if not widget.isVisible():
             widget.show()
         else:
             widget.hide()
