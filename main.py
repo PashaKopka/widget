@@ -6,6 +6,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFileDialog, QPushButton
 
+from widget.compile_ui import UiCompiler
 from widget.ui.main_design import Ui_MainWindow
 from widget.clockwidget import ClockWidget
 from widget.widged import BaseWidget
@@ -42,9 +43,12 @@ class WidgetAdder:
         :return: None
         """
         filename, path = self.get_file_name()
-        widget = self.create_widget(filename, path)
+        if filename[1] == 'ui':
+            ui_compiler = UiCompiler(filename=filename[0], path=path)
+            path = ui_compiler.out_file_path
+        widget = self.create_widget(filename[0], path)
 
-        button = QPushButton(filename)
+        button = QPushButton(filename[0])
         button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget))
         button.setFont(QFont('MS Shell Dlg 2', 14))
         self.main_window_obj.ui.widgets_layout.addWidget(button)
@@ -58,7 +62,6 @@ class WidgetAdder:
         path = QFileDialog.getOpenFileName()
         filename = path[0].split('/')
         filename = filename[-1].split('.')
-        filename = filename[0]
         return filename, path[0]
 
     @staticmethod
@@ -118,9 +121,10 @@ class MainWindow(QtWidgets.QMainWindow):
             widget.hide()
 
 
-app = QtWidgets.QApplication([])
+if __name__ == '__main__':
+    app = QtWidgets.QApplication([])
 
-application = MainWindow()
-application.show()
+    application = MainWindow()
+    application.show()
 
-sys.exit(app.exec())
+    sys.exit(app.exec())
