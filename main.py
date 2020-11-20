@@ -47,47 +47,62 @@ class WidgetAdder:
         """
         filename, path = self.__prepare_widget_data(filename, path)
 
-        if filename is not None and filename[0] not in self.widgets_names:
-            widget = self.create_widget(filename[0], path)
-            self.widgets_names.append(filename[0])
+        if filename is None or filename[0] in self.widgets_names:
+            return
 
-            button = QPushButton(filename[0])
-            button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget))
-            button.setFont(QFont('MS Shell Dlg 2', 14))
+        widget = self.create_widget(filename[0], path)
+        self.widgets_names.append(filename[0])
 
-            self.main_window_obj.ui.widgets_layout.addWidget(button)
+        button = QPushButton(filename[0])
+        button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget))
+        button.setFont(QFont('MS Shell Dlg 2', 14))
+
+        self.main_window_obj.ui.widgets_layout.addWidget(button)
 
     def __prepare_widget_data(self, filename=None, path=None):
+        """
+        This function prepare data for adding widget and
+        check existing of widget
+        :param filename: name of file
+        :param path: path to the file
+        :return: filename and path ro this file
+        """
         if filename is None or path is None:
             filename, path = self.get_file_name()
             if filename[1] == 'ui':
                 ui_compiler = UiCompiler(filename=filename[0], path=path)
                 path = ui_compiler.out_file_path
-            if not self.widget_exist(filename[0]):
-                self.add_widget_to_db(filename[0], path)
+            self.add_widget_to_db(filename[0], path)
+
         else:
             filename = [filename]
-        if not self.widget_exist(filename[0]):
-            return filename[0], path
         return filename, path
 
-    def widget_exist(self, filename):
-        rows = self.get_db_rows()
-        exist = False
-        for row in rows:
-            if filename in row:
-                exist = True
-
-        return exist
-
     def add_widgets_from_db(self):
+        """
+        This function call add_widget function and give data from database
+        :return: None
+        """
         rows = self.get_db_rows()
         for row in rows:
             if not row[3]:
                 self.add_widget(row[1], row[2])
 
     def get_db_rows(self) -> tuple:
+        """
+        This function get data from database
+        :return: tuple of rows in database table
+        """
         return self.db_worker.get_rows()
+
+    def add_widget_to_db(self, filename, path):
+        """
+        This function add data to the database
+        :param filename: name of py-file
+        :param path: path to this file
+        :return: None
+        """
+        self.db_worker.add_row(filename, path)
 
     @staticmethod
     def get_file_name():
@@ -118,10 +133,6 @@ class WidgetAdder:
             raise Exception('File have not class Ui_Form')
         else:
             return NewWidget(module.Ui_Form)
-
-    def add_widget_to_db(self, filename, path):
-
-        self.db_worker.add_row(filename, path)
 
 
 class MainWindow(QtWidgets.QMainWindow):

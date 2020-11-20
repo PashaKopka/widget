@@ -21,6 +21,8 @@ class DBWorker:
         :param path: path to py-file with Ui_Form file
         :return: None
         """
+        if self.check_for_existing(filename, path):
+            return
         query = 'INSERT INTO `user_widgets_table` (`filename`, `path`) VALUES (%s, %s)'
         self.cursor.execute(query, (filename, path))
         self.connection.commit()
@@ -32,3 +34,12 @@ class DBWorker:
         """
         self.cursor.execute("SELECT * FROM user_widgets_table")
         return self.cursor.fetchall()
+
+    def check_for_existing(self, filename, path):
+        rows = self.get_rows()
+        exist = False
+        for row in rows:
+            if filename == row[1] and path == filename[2]:
+                exist = True
+
+        return exist
