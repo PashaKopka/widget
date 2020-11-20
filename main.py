@@ -7,6 +7,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QFileDialog, QPushButton
 
 from widget.compile_ui import UiCompiler
+from widget.db_worker import DBWorker
 from widget.ui.main_design import Ui_MainWindow
 from widget.clockwidget import ClockWidget
 from widget.widged import BaseWidget
@@ -35,23 +36,35 @@ class WidgetAdder:
 
     def __init__(self, main_window_obj):
         self.main_window_obj = main_window_obj
+        self.db_worker = DBWorker()
 
-    def add_widget(self):
+    def add_widget(self, filename=None, path=None):
         """
         This function adding checkbox to ScrollBar and
         create function for activating this checkbox
         :return: None
         """
-        filename, path = self.get_file_name()
-        if filename[1] == 'ui':
-            ui_compiler = UiCompiler(filename=filename[0], path=path)
-            path = ui_compiler.out_file_path
+        if filename is None and path is None:
+            filename, path = self.get_file_name()
+            if filename[1] == 'ui':
+                ui_compiler = UiCompiler(filename=filename[0], path=path)
+                path = ui_compiler.out_file_path
+            self.add_widget_to_db(filename[0], path)
+        else:
+            filename = [filename]
         widget = self.create_widget(filename[0], path)
 
         button = QPushButton(filename[0])
         button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget))
         button.setFont(QFont('MS Shell Dlg 2', 14))
         self.main_window_obj.ui.widgets_layout.addWidget(button)
+
+    def add_widgets_from_db(self):
+        rows = self.db_worker.get_rows()
+        for row in rows:
+            print(row[1])
+            if not row[3]:
+                self.add_widget(row[1], row[2])
 
     @staticmethod
     def get_file_name():
@@ -83,6 +96,9 @@ class WidgetAdder:
         else:
             return NewWidget(module.Ui_Form)
 
+    def add_widget_to_db(self, filename, path):
+        self.db_worker.add_row(filename, path)
+
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -90,10 +106,13 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.click_time = time.time()
         self.widget_adder = WidgetAdder(main_window_obj=self)
+        self.db_worker = DBWorker()
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle('Widget Manager')
+
+        self.widget_adder.add_widgets_from_db()
 
         self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
 
