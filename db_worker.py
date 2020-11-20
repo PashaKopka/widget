@@ -30,16 +30,31 @@ class DBWorker:
     def get_rows(self) -> tuple:
         """
         This function return
-        :return:
+        :return: None
         """
-        self.cursor.execute("SELECT * FROM user_widgets_table")
+        self.cursor.execute('SELECT * FROM user_widgets_table')
         return self.cursor.fetchall()
 
     def check_for_existing(self, filename, path):
+        """
+        This function check if row exist in database
+        :param filename: name of py-file
+        :param path: path to this file
+        :return: None
+        """
         rows = self.get_rows()
         exist = False
         for row in rows:
-            if filename == row[1] and path == filename[2]:
+            if filename == row[1] and path == filename[2] and row[3] == 0:
                 exist = True
 
         return exist
+
+    def delete_row(self, filename: str):
+        """
+        This function set del = 1 where is filename
+        :param filename: py-file name
+        :return: None
+        """
+        self.cursor.execute(f'UPDATE user_widgets_table SET del=1 WHERE filename="{filename}"')
+        self.connection.commit()

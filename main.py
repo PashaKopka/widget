@@ -54,7 +54,7 @@ class WidgetAdder:
         self.widgets_names.append(filename[0])
 
         button = QPushButton(filename[0])
-        button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget))
+        button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget, button))
         button.setFont(QFont('MS Shell Dlg 2', 14))
 
         self.main_window_obj.ui.widgets_layout.addWidget(button)
@@ -142,6 +142,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.click_time = time.time()
         self.widget_adder = WidgetAdder(main_window_obj=self)
         self.db_worker = DBWorker()
+        self.selected_widget = None
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -150,13 +151,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget_adder.add_widgets_from_db()
 
         self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
+        self.ui.del_widget_button.clicked.connect(lambda: self.delete_button(self.selected_widget))
 
         self.clock_widget = ClockWidget()
-        self.ui.clock_widget_button.clicked.connect(lambda: self.double_click_event(self.clock_widget))
+        self.ui.clock_widget_button.clicked.connect(
+            lambda: self.double_click_event(self.clock_widget, self.ui.clock_widget_button))
 
-    def double_click_event(self, widget):
+    def delete_button(self, button: QPushButton):
+        filename = button.text()
+        self.db_worker.delete_row(filename)
+        self.selected_widget.hide()
+        self.widget_adder.widgets_names.remove(filename)
+
+    def double_click_event(self, widget: QtWidgets, button: QPushButton):
         """
         This function check: is click double or not
+        :param button: selected button
         :param widget: widget, that will be displayed
         :return:
         """
@@ -164,6 +174,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.display_widget(widget)
         else:
             self.click_time = time.time()
+        self.selected_widget = button
 
     @staticmethod
     def display_widget(widget: BaseWidget):
