@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main.ui'
+# Form implementation generated from reading ui file 'E:/!Files/Desktop/main.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.1
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(542, 432)
+        MainWindow.resize(562, 438)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
         self.widgets_area.setWidgetResizable(True)
         self.widgets_area.setObjectName("widgets_area")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 497, 346))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 517, 342))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -63,22 +63,11 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.widgets_layout)
         self.widgets_area.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout_2.addWidget(self.widgets_area)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
-        self.horizontalLayout.setObjectName("horizontalLayout")
         self.add_widget_button = QtWidgets.QPushButton(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.add_widget_button.setFont(font)
+        self.add_widget_button.setMinimumSize(QtCore.QSize(0, 40))
+        self.add_widget_button.setMaximumSize(QtCore.QSize(1000, 16777215))
         self.add_widget_button.setObjectName("add_widget_button")
-        self.horizontalLayout.addWidget(self.add_widget_button)
-        self.del_widget_button = QtWidgets.QPushButton(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.del_widget_button.setFont(font)
-        self.del_widget_button.setObjectName("del_widget_button")
-        self.horizontalLayout.addWidget(self.del_widget_button)
-        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.verticalLayout_2.addWidget(self.add_widget_button)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -92,4 +81,3 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.clock_widget_button.setText(_translate("MainWindow", "clock widget"))
         self.add_widget_button.setText(_translate("MainWindow", "Add widget"))
-        self.del_widget_button.setText(_translate("MainWindow", "Delete widget"))

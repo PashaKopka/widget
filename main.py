@@ -78,7 +78,10 @@ class WidgetAdder:
         module = importlib.util.module_from_spec(module_importer)
         module_importer.loader.exec_module(module)
 
-        return NewWidget(module.Ui_Form)
+        if not hasattr(module, 'Ui_Form'):
+            raise Exception('File have not class Ui_Form')
+        else:
+            return NewWidget(module.Ui_Form)
 
 
 class MainWindow(QtWidgets.QMainWindow):
