@@ -37,34 +37,57 @@ class WidgetAdder:
     def __init__(self, main_window_obj):
         self.main_window_obj = main_window_obj
         self.db_worker = DBWorker()
+        self.widgets_names = []
 
     def add_widget(self, filename=None, path=None):
         """
-        This function adding checkbox to ScrollBar and
-        create function for activating this checkbox
+        This function adding pushButton to ScrollBar and
+        create function for activating this button
         :return: None
         """
-        if filename is None and path is None:
+        filename, path = self.__prepare_widget_data(filename, path)
+
+        if filename is not None and filename[0] not in self.widgets_names:
+            widget = self.create_widget(filename[0], path)
+            self.widgets_names.append(filename[0])
+
+            button = QPushButton(filename[0])
+            button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget))
+            button.setFont(QFont('MS Shell Dlg 2', 14))
+
+            self.main_window_obj.ui.widgets_layout.addWidget(button)
+
+    def __prepare_widget_data(self, filename=None, path=None):
+        if filename is None or path is None:
             filename, path = self.get_file_name()
             if filename[1] == 'ui':
                 ui_compiler = UiCompiler(filename=filename[0], path=path)
                 path = ui_compiler.out_file_path
-            self.add_widget_to_db(filename[0], path)
+            if not self.widget_exist(filename[0]):
+                self.add_widget_to_db(filename[0], path)
         else:
             filename = [filename]
-        widget = self.create_widget(filename[0], path)
+        if not self.widget_exist(filename[0]):
+            return filename[0], path
+        return filename, path
 
-        button = QPushButton(filename[0])
-        button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget))
-        button.setFont(QFont('MS Shell Dlg 2', 14))
-        self.main_window_obj.ui.widgets_layout.addWidget(button)
+    def widget_exist(self, filename):
+        rows = self.get_db_rows()
+        exist = False
+        for row in rows:
+            if filename in row:
+                exist = True
+
+        return exist
 
     def add_widgets_from_db(self):
-        rows = self.db_worker.get_rows()
+        rows = self.get_db_rows()
         for row in rows:
-            print(row[1])
             if not row[3]:
                 self.add_widget(row[1], row[2])
+
+    def get_db_rows(self) -> tuple:
+        return self.db_worker.get_rows()
 
     @staticmethod
     def get_file_name():
@@ -97,6 +120,7 @@ class WidgetAdder:
             return NewWidget(module.Ui_Form)
 
     def add_widget_to_db(self, filename, path):
+
         self.db_worker.add_row(filename, path)
 
 
