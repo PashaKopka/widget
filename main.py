@@ -177,6 +177,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         if (time.time() - self.click_time) < .5:
             self.display_widget(widget)
+            self.toggle_visibility_db(button)
         else:
             self.click_time = time.time()
         self.selected_widget = button
@@ -192,6 +193,9 @@ class MainWindow(QtWidgets.QMainWindow):
             widget.show()
         else:
             widget.hide()
+
+    def toggle_visibility_db(self, button: QPushButton):
+        self.db_worker.toggle_visibility(button.text())
 
 
 if __name__ == '__main__':

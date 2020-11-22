@@ -58,3 +58,12 @@ class DBWorker:
         """
         self.cursor.execute(f'UPDATE user_widgets_table SET del=1 WHERE filename="{filename}"')
         self.connection.commit()
+
+    def toggle_visibility(self, filename):
+        self.cursor.execute(f'SELECT visible FROM user_widgets_table WHERE filename="{filename}"')
+        visibility = self.cursor.fetchall()[0][0]
+        if visibility:
+            self.cursor.execute(f'UPDATE user_widgets_table SET visible=0 WHERE filename="{filename}"')
+        else:
+            self.cursor.execute(f'UPDATE user_widgets_table SET visible=1 WHERE filename="{filename}"')
+        self.connection.commit()
