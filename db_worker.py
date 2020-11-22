@@ -1,9 +1,16 @@
 import pymysql
 
+from widget.settings import DB_CONFIG
+
 
 class DBWorker:
 
-    def __init__(self, username='root', password='root', db_name='widget_db', host='localhost'):
+    def __init__(self,
+                 username=DB_CONFIG['username'],
+                 password=DB_CONFIG['password'],
+                 db_name=DB_CONFIG['database_name'],
+                 host=DB_CONFIG['host']
+                 ):
         """
         Initializing database connection and cursor
         :param username: username of database
