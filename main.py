@@ -39,11 +39,24 @@ class WidgetAdder:
         self.db_worker = DBWorker()
         self.widgets_names = []
 
+    def visualise_widgets(self):
+        """
+        This function visualize widgets and add button to the scrollbar
+        :return: None
+        """
+        rows = self.get_db_rows()
+        for row in rows:
+            if row[3] and not row[4]:  # if visible == True and del == False
+                widget = self.add_widget(filename=row[1], path=row[2])
+                self.main_window_obj.display_widget(widget)
+            elif not row[4]:
+                self.add_widget(row[1], row[2])
+
     def add_widget(self, filename=None, path=None):
         """
         This function adding pushButton to ScrollBar and
         create function for activating this button
-        :return: None
+        :return: widget class with design UI_Form
         """
         filename, path = self.__prepare_widget_data(filename, path)
 
@@ -58,6 +71,8 @@ class WidgetAdder:
         button.setFont(QFont('MS Shell Dlg 2', 14))
 
         self.main_window_obj.ui.widgets_layout.addWidget(button)
+
+        return widget
 
     def __prepare_widget_data(self, filename=None, path=None):
         """
@@ -77,16 +92,6 @@ class WidgetAdder:
         else:
             filename = [filename]
         return filename, path
-
-    def add_widgets_from_db(self):
-        """
-        This function call add_widget function and give data from database
-        :return: None
-        """
-        rows = self.get_db_rows()
-        for row in rows:
-            if not row[3]:
-                self.add_widget(row[1], row[2])
 
     def get_db_rows(self) -> tuple:
         """
@@ -148,7 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.setWindowTitle('Widget Manager')
 
-        self.widget_adder.add_widgets_from_db()
+        self.widget_adder.visualise_widgets()
 
         self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
         self.ui.del_widget_button.clicked.connect(lambda: self.delete_button(self.selected_widget))

@@ -45,7 +45,7 @@ class DBWorker:
         rows = self.get_rows()
         exist = False
         for row in rows:
-            if filename == row[1] and path == filename[2] and row[3] == 0:
+            if filename == row[1] and path == filename[2] and row[4] == 0:
                 exist = True
 
         return exist
