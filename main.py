@@ -4,7 +4,7 @@ import sys
 import importlib.util
 from widget import settings
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon
 
@@ -206,6 +206,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def toggle_visibility_db(self, button: QPushButton):
         self.db_worker.toggle_visibility(button.text())
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        self.tray_icon.hide()
 
     @staticmethod
     def display_widget(widget: BaseWidget, button=None):
