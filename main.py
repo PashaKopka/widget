@@ -1,10 +1,13 @@
+import os
 import time
 import sys
 import importlib.util
+from widget import settings
 
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QFileDialog, QPushButton
+from PyQt5.QtCore import QFile
+from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon, QStyle
 
 from widget.compile_ui import UiCompiler
 from widget.db_worker import DBWorker
@@ -148,10 +151,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget_adder = WidgetAdder(main_window_obj=self)
         self.db_worker = DBWorker()
         self.selected_widget = None
+        self.main_icon = QIcon(os.path.normpath(f'{settings.MAIN_DIRECTORY}/ui/res/logo.png'))
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle('Widget Manager')
+        self.setWindowIcon(self.main_icon)
+
+        self.tray_icon = QSystemTrayIcon()
+        self.tray_icon.setIcon(self.main_icon)
+        self.tray_icon.show()
 
         self.widget_adder.visualise_widgets()
 
