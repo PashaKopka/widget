@@ -150,7 +150,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.click_time = time.time()
         self.widget_adder = WidgetAdder(main_window_obj=self)
         self.db_worker = DBWorker()
-        self.selected_widget = None
+        self.selected_widget = ()
         self.main_icon = QIcon(os.path.normpath(f'{settings.MAIN_DIRECTORY}/ui/res/logo.png'))
 
         self.ui = Ui_MainWindow()
@@ -165,16 +165,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget_adder.visualise_widgets()
 
         self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
-        self.ui.del_widget_button.clicked.connect(lambda: self.delete_button(self.selected_widget))
+        self.ui.del_widget_button.clicked.connect(lambda: self.delete_button())
 
         self.clock_widget = ClockWidget()
         self.ui.clock_widget_button.clicked.connect(
             lambda: self.double_click_event(self.clock_widget, self.ui.clock_widget_button))
 
-    def delete_button(self, button: QPushButton):
-        filename = button.text()
+    def delete_button(self):
+        filename = self.selected_widget[0].text()
         self.db_worker.delete_row(filename)
-        self.selected_widget.hide()
+        self.selected_widget[0].hide()
+        self.selected_widget[1].hide()
         self.widget_adder.widgets_names.remove(filename)
 
     def double_click_event(self, widget: QtWidgets, button: QPushButton):
@@ -189,7 +190,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.toggle_visibility_db(button)
         else:
             self.click_time = time.time()
-        self.selected_widget = button
+        self.selected_widget = (button, widget)
 
     @staticmethod
     def display_widget(widget: BaseWidget):
