@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 import sys
 import importlib.util
@@ -79,7 +80,8 @@ class WidgetAdder:
             return  # TODO error
 
         widget = self.create_widget(filename[0], path)
-        widget.move(x, y)
+        if x is not None and y is not None:
+            widget.move(x, y)
         self.widgets_name.append(filename[0])
 
         button = QPushButton(filename[0])
@@ -100,6 +102,7 @@ class WidgetAdder:
         """
         if filename is None or path is None:
             filename, path = self.get_file()
+            path = self.copy_file(filename, path)
             if filename[1] == 'ui':
                 ui_compiler = UiCompiler(filename=filename[0], path=path)
                 path = ui_compiler.out_file_path
@@ -124,6 +127,12 @@ class WidgetAdder:
         :return: None
         """
         self.db_worker.add_row(filename, path)
+
+    @staticmethod
+    def copy_file(filename, path) -> str:
+        new_path = f'{settings.MAIN_DIRECTORY}\\ui\\user_ui\\{filename[0]}.py'
+        shutil.copyfile(path, new_path)
+        return new_path
 
     @staticmethod
     def get_file() -> tuple:
