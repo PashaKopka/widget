@@ -34,15 +34,16 @@ class DBWorker:
         self.cursor.execute(query, (filename, path))
         self.connection.commit()
 
-    def get_rows(self) -> tuple:
+    def get_rows(self) -> list:
         """
         This function return
         :return: None
         """
         self.cursor.execute('SELECT * FROM user_widgets_table')
-        return self.cursor.fetchall()
+        data = self.prepare_data(self.cursor.fetchall())
+        return data
 
-    def check_for_existing(self, filename, path):
+    def check_for_existing(self, filename: str, path: str) -> bool:
         """
         This function check if row exist in database
         :param filename: name of py-file
@@ -52,12 +53,12 @@ class DBWorker:
         rows = self.get_rows()
         exist = False
         for row in rows:
-            if filename == row[1] and path == filename[2] and row[4] == 0:
+            if filename == row['filename'] and path == filename[2] and row['del'] == 0:
                 exist = True
 
         return exist
 
-    def delete_row(self, filename: str):
+    def delete_row(self, filename: str) -> None:
         """
         This function set del = 1 where is filename
         :param filename: py-file name
@@ -66,7 +67,7 @@ class DBWorker:
         self.cursor.execute(f'UPDATE user_widgets_table SET del=1 WHERE filename="{filename}"')
         self.connection.commit()
 
-    def toggle_visibility(self, filename):
+    def toggle_visibility(self, filename: str) -> None:
         self.cursor.execute(f'SELECT visible FROM user_widgets_table WHERE filename="{filename}"')
         visibility = self.cursor.fetchall()[0][0]
         if visibility:
@@ -74,3 +75,25 @@ class DBWorker:
         else:
             self.cursor.execute(f'UPDATE user_widgets_table SET visible=1 WHERE filename="{filename}"')
         self.connection.commit()
+
+    def add_coordinate(self, filename: str, x, y) -> None:
+        self.cursor.execute(
+            f'UPDATE user_widgets_table SET x_coordinate={x}, y_coordinate={y} WHERE filename="{filename}"')
+        self.connection.commit()
+
+    @staticmethod
+    def prepare_data(rows: tuple) -> list:
+        data = []
+        for row in rows:
+            _row = {
+                'id': row[0],
+                'filename': row[1],
+                'path': row[2],
+                'x': row[3],
+                'y': row[4],
+                'visible': row[5],
+                'del': row[6]
+            }
+            data.append(_row)
+
+        return data

@@ -5,9 +5,8 @@ import importlib.util
 from widget import settings
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QFile
 from PyQt5.QtGui import QFont, QIcon
-from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon, QStyle
+from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon
 
 from widget.compile_ui import UiCompiler
 from widget.db_worker import DBWorker
@@ -23,12 +22,20 @@ class NewWidget(BaseWidget):
         $ pyuic5 design.ui -o design.py
     """
 
-    def __init__(self, design_ui):
+    def __init__(self, design_ui, name):
         super().__init__()
 
+        self.name = name
         self.ui = design_ui()
         self.ui.setupUi(self)
         self.ui.label.mouseMoveEvent = self.move_window
+        self.db_worker = DBWorker()
+
+    def move_window(self, e):
+        super().move_window(e)
+        x = self.x()
+        y = self.y()
+        self.db_worker.add_coordinate(self.name, x, y)
 
 
 class WidgetAdder:
@@ -40,7 +47,7 @@ class WidgetAdder:
     def __init__(self, main_window_obj):
         self.main_window_obj = main_window_obj
         self.db_worker = DBWorker()
-        self.widgets_names = []
+        self.widgets_name = []  # ('filename', object)
 
     def visualise_widgets(self):
         """
@@ -49,13 +56,13 @@ class WidgetAdder:
         """
         rows = self.get_db_rows()
         for row in rows:
-            if row[3] and not row[4]:  # if visible == True and del == False
-                widget = self.add_widget(filename=row[1], path=row[2])
-                self.main_window_obj.display_widget(widget)
-            elif not row[4]:
-                self.add_widget(row[1], row[2])
+            if row['visible'] and not row['del']:  # if visible == True and del == False
+                widget = self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'])
+                self.main_window_obj.display_widget(widget=widget)
+            elif not row['del']:
+                self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'])
 
-    def add_widget(self, filename=None, path=None):
+    def add_widget(self, filename=None, path=None, x=None, y=None):
         """
         This function adding pushButton to ScrollBar and
         create function for activating this button
@@ -63,11 +70,12 @@ class WidgetAdder:
         """
         filename, path = self.__prepare_widget_data(filename, path)
 
-        if filename is None or filename[0] in self.widgets_names:
+        if filename is None or filename[0] in self.widgets_name:
             return
 
         widget = self.create_widget(filename[0], path)
-        self.widgets_names.append(filename[0])
+        widget.move(x, y)
+        self.widgets_name.append(filename[0])
 
         button = QPushButton(filename[0])
         button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget, button))
@@ -86,7 +94,7 @@ class WidgetAdder:
         :return: filename and path ro this file
         """
         if filename is None or path is None:
-            filename, path = self.get_file_name()
+            filename, path = self.get_file()
             if filename[1] == 'ui':
                 ui_compiler = UiCompiler(filename=filename[0], path=path)
                 path = ui_compiler.out_file_path
@@ -96,7 +104,7 @@ class WidgetAdder:
             filename = [filename]
         return filename, path
 
-    def get_db_rows(self) -> tuple:
+    def get_db_rows(self) -> list:
         """
         This function get data from database
         :return: tuple of rows in database table
@@ -113,7 +121,7 @@ class WidgetAdder:
         self.db_worker.add_row(filename, path)
 
     @staticmethod
-    def get_file_name():
+    def get_file():
         """
         This function return data of the file
         :return: filename and path to file
@@ -140,7 +148,7 @@ class WidgetAdder:
         if not hasattr(module, 'Ui_Form'):
             raise Exception('File have not class Ui_Form')
         else:
-            return NewWidget(module.Ui_Form)
+            return NewWidget(module.Ui_Form, filename)
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -172,11 +180,15 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda: self.double_click_event(self.clock_widget, self.ui.clock_widget_button))
 
     def delete_button(self):
+        """
+        This function hide widget and button of this widget
+        :return: None
+        """
         filename = self.selected_widget[0].text()
         self.db_worker.delete_row(filename)
         self.selected_widget[0].hide()
         self.selected_widget[1].hide()
-        self.widget_adder.widgets_names.remove(filename)
+        self.widget_adder.widgets_name.remove(filename)
 
     def double_click_event(self, widget: QtWidgets, button: QPushButton):
         """
@@ -186,26 +198,27 @@ class MainWindow(QtWidgets.QMainWindow):
         :return:
         """
         if (time.time() - self.click_time) < .5:
-            self.display_widget(widget)
+            self.display_widget(widget=widget, button=button)
             self.toggle_visibility_db(button)
         else:
             self.click_time = time.time()
         self.selected_widget = (button, widget)
 
+    def toggle_visibility_db(self, button: QPushButton):
+        self.db_worker.toggle_visibility(button.text())
+
     @staticmethod
-    def display_widget(widget: BaseWidget):
+    def display_widget(widget: BaseWidget, button=None):
         """
         display the widget on users screen
+        :param button: pressed button
         :param widget: widget, that will be displayed
         :return: None
         """
         if not widget.isVisible():
             widget.show()
-        else:
+        elif button is not None:
             widget.hide()
-
-    def toggle_visibility_db(self, button: QPushButton):
-        self.db_worker.toggle_visibility(button.text())
 
 
 if __name__ == '__main__':
