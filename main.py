@@ -3,15 +3,19 @@ import shutil
 import time
 import sys
 import importlib.util
+
+from PyQt5.QtCore import Qt
+
 from widget import settings
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtGui import QFont, QIcon
-from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon
+from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon, QDialog
 
 from widget.compile_ui import UiCompiler
 from widget.db_worker import DBWorker
 from widget.ui.main_design import Ui_MainWindow
+from widget.ui.error_message_design import Ui_Dialog
 from widget.clockwidget import ClockWidget
 from widget.widged import BaseWidget
 
@@ -174,6 +178,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.db_worker = DBWorker()
         self.selected_widget = ()
         self.main_icon = QIcon(os.path.normpath(f'{settings.MAIN_DIRECTORY}/ui/res/logo.png'))
+        self.error_dialog_ui = Ui_Dialog()
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -233,6 +238,19 @@ class MainWindow(QtWidgets.QMainWindow):
         :return: None
         """
         self.tray_icon.hide()
+
+    def show_error_dialog(self, message: str) -> None:
+        """
+        This function shows error dialog message
+        :param message: Your message
+        :return: None
+        """
+        dialog = QDialog()
+        self.error_dialog_ui.setupUi(dialog)
+        self.error_dialog_ui.error_message_label.setText(message)
+        dialog.setWindowTitle('Dialog')
+        dialog.setWindowModality(Qt.ApplicationModal)
+        dialog.exec_()
 
     @staticmethod
     def display_widget(widget: BaseWidget, button=None) -> None:
