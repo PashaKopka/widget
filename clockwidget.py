@@ -37,13 +37,7 @@ class ClockWidget(BaseWidget):
 
 
 def main():
-    return ClockWidget('clock widget')
+    filename = __file__.split('/')[-1].split('.')[0]
+    print(filename)
+    return ClockWidget(filename)
 
-
-if __name__ == '__main__':
-    app = QtWidgets.QApplication([])
-
-    application = ClockWidget('clock widget')
-    application.show()
-
-    sys.exit(app.exec())
