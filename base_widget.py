@@ -16,8 +16,10 @@ class BaseWidget(QtWidgets.QMainWindow):
         super(BaseWidget, self).__init__()
         self.name = name
         self.draggable = True
+        self.click_position = None
 
         self.menu = QMenu(self)
+        self.menu.setStyleSheet('QMenu{color : white;}')
         self.actions = {
             'move center': self.move_window_center,
             'pin': self.pin
@@ -25,7 +27,7 @@ class BaseWidget(QtWidgets.QMainWindow):
         self._create_context_menu()
 
         self._normalize_window()
-        self._stay_at_all_virtual_descktops()
+        self._stay_at_all_virtual_desktops()
         self.db_worker = DBWorker()
 
     def move_window(self, e) -> None:
@@ -49,12 +51,12 @@ class BaseWidget(QtWidgets.QMainWindow):
             self.draggable = True
 
     def move_window_center(self):
-        frameGm = self.frameGeometry()
+        frame_gm = self.frameGeometry()
         screen = PyQt5.QtWidgets.QApplication.desktop().screenNumber(
             PyQt5.QtWidgets.QApplication.desktop().cursor().pos())
-        centerPoint = PyQt5.QtWidgets.QApplication.desktop().screenGeometry(screen).center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
+        center_point = PyQt5.QtWidgets.QApplication.desktop().screenGeometry(screen).center()
+        frame_gm.moveCenter(center_point)
+        self.move(frame_gm.topLeft())
 
     def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
         """
@@ -89,7 +91,7 @@ class BaseWidget(QtWidgets.QMainWindow):
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
     @staticmethod
-    def _stay_at_all_virtual_descktops():
+    def _stay_at_all_virtual_desktops():
         """
         Function make window visible at all virtual desktops
         (tested only on windows 10)

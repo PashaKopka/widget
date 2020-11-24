@@ -38,6 +38,5 @@ class ClockWidget(BaseWidget):
 
 def main():
     filename = __file__.split('/')[-1].split('.')[0]
-    print(filename)
     return ClockWidget(filename)
 

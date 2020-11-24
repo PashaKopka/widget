@@ -1,9 +1,9 @@
 import sys
 
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTime
 
 from widget.ui.clock_design import Ui_Form
-from PyQt5 import QtWidgets
 
 from widget.base_widget import BaseWidget
 
@@ -40,3 +40,11 @@ def main():
     filename = __file__.split('\\')[-1].split('.')[0]
     return ClockWidget(filename)
 
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication([])
+
+    application = ClockWidget('name')
+    application.show()
+
+    sys.exit(app.exec())

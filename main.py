@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt
 
 from widget import settings
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon, QDialog
 
