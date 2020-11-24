@@ -58,6 +58,8 @@ class BaseWidget(QtWidgets.QMainWindow):
         frame_gm.moveCenter(center_point)
         self.move(frame_gm.topLeft())
 
+        self.db_worker.add_coordinate(self.name, self.x(), self.y())
+
     def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
         """
         Function for handling mouse click event
