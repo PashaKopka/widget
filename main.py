@@ -16,8 +16,7 @@ from widget.compile_ui import UiCompiler
 from widget.db_worker import DBWorker
 from widget.ui.main_design import Ui_MainWindow
 from widget.ui.error_message_design import Ui_Dialog
-from widget.clockwidget import ClockWidget
-from widget.widged import BaseWidget
+from widget.base_widget import BaseWidget
 
 
 class NewWidget(BaseWidget):
@@ -28,24 +27,11 @@ class NewWidget(BaseWidget):
     """
 
     def __init__(self, design_ui, name: str) -> None:
-        super().__init__()
+        super().__init__(name)
 
-        self.name = name
         self.ui = design_ui()
         self.ui.setupUi(self)
         self.ui.label.mouseMoveEvent = self.move_window
-        self.db_worker = DBWorker()
-
-    def move_window(self, e) -> None:
-        """
-        This is override function that add coordinates of widget in database
-        :param e: override parameter
-        :return: None
-        """
-        super().move_window(e)
-        x = self.x()
-        y = self.y()
-        self.db_worker.add_coordinate(self.name, x, y)
 
 
 class WidgetAdder:
@@ -102,25 +88,6 @@ class WidgetAdder:
 
             return widget
 
-    def __prepare_widget_data(self, filename=None, path=None) -> tuple:
-        """
-        This function prepare data for adding widget and
-        check existing of widget
-        :param filename: name of file
-        :param path: path to the file
-        :return: filename and path ro this file
-        """
-        if filename is None or path is None:
-            filename, path = self.get_file()
-            path = self.copy_file(filename, path)
-            if filename[1] == 'ui':
-                ui_compiler = UiCompiler(filename=filename[0], path=path)
-                path = ui_compiler.out_file_path
-
-        else:
-            filename = [filename]
-        return filename, path
-
     def get_db_rows(self) -> list:
         """
         This function get data from database
@@ -150,19 +117,40 @@ class WidgetAdder:
         module = importlib.util.module_from_spec(module_importer)
         module_importer.loader.exec_module(module)
 
-        if not hasattr(module, 'Ui_Form'):
-            self.main_window_obj.show_error_dialog('Must be Ui_Form in py-file')
-        else:
+        if hasattr(module, 'main'):
+            return module.main()
+        elif hasattr(module, 'Ui_Form'):
             return NewWidget(module.Ui_Form, filename)
+        else:
+            self.main_window_obj.show_error_dialog('Must be Ui_Form in py-file')
+
+    def __prepare_widget_data(self, filename=None, path=None) -> tuple:
+        """
+        This function prepare data for adding widget and
+        check existing of widget
+        :param filename: name of file
+        :param path: path to the file
+        :return: filename and path ro this file
+        """
+        if filename is None or path is None:
+            filename, path = self.__get_file()
+            path = self.__copy_file(filename, path)
+            if filename[1] == 'ui':
+                ui_compiler = UiCompiler(filename=filename[0], path=path)
+                path = ui_compiler.out_file_path
+
+        else:
+            filename = [filename]
+        return filename, path
 
     @staticmethod
-    def copy_file(filename, path) -> str:
+    def __copy_file(filename, path) -> str:
         new_path = f'{settings.MAIN_DIRECTORY}\\ui\\user_ui\\{filename[0]}.py'
         shutil.copyfile(path, new_path)
         return new_path
 
     @staticmethod
-    def get_file() -> tuple:
+    def __get_file() -> tuple:
         """
         This function return data of the file
         :return: filename and path to file
@@ -198,10 +186,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
         self.ui.del_widget_button.clicked.connect(lambda: self.delete_button())
 
-        self.clock_widget = ClockWidget()
-        self.ui.clock_widget_button.clicked.connect(
-            lambda: self.double_click_event(self.clock_widget, self.ui.clock_widget_button))
-
     def delete_button(self) -> None:
         """
         This function hide widget and button of this widget
@@ -235,13 +219,14 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         self.db_worker.toggle_visibility(button.text())
 
-    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+    def close(self) -> bool:
         """
         This is override function that calls when window is closing
-        :param a0: override parameter
-        :return: None
+        :return: boolean property
         """
+        prop = super().close()
         self.tray_icon.hide()
+        return prop
 
     def show_error_dialog(self, message: str) -> None:
         """

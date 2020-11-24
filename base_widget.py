@@ -7,11 +7,14 @@ import PyQt5
 import pyvda
 import win32gui
 
+from widget.db_worker import DBWorker
+
 
 class BaseWidget(QtWidgets.QMainWindow):
 
-    def __init__(self):
+    def __init__(self, name: str):
         super(BaseWidget, self).__init__()
+        self.name = name
         self.draggable = True
 
         self.menu = QMenu(self)
@@ -23,10 +26,11 @@ class BaseWidget(QtWidgets.QMainWindow):
 
         self._normalize_window()
         self._stay_at_all_virtual_descktops()
+        self.db_worker = DBWorker()
 
-    def move_window(self, e):
+    def move_window(self, e) -> None:
         """
-        Function for moving window
+        This is override function that add coordinates of widget in database and move widget
         :param e: -
         :return: None
         """
@@ -34,6 +38,9 @@ class BaseWidget(QtWidgets.QMainWindow):
             self.move(self.pos() + e.globalPos() - self.click_position)
             self.click_position = e.globalPos()
             e.accept()
+            x = self.x()
+            y = self.y()
+            self.db_worker.add_coordinate(self.name, x, y)
 
     def pin(self):
         if self.draggable:
