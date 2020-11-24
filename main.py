@@ -72,7 +72,7 @@ class WidgetAdder:
             elif not row['del']:
                 self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'])
 
-    def add_widget(self, filename=None, path=None, x=None, y=None) -> NewWidget:
+    def add_widget(self, filename=None, path=None, x=None, y=None):
         """
         This function adding pushButton to ScrollBar and
         create function for activating this button
@@ -80,8 +80,12 @@ class WidgetAdder:
         """
         filename, path = self.__prepare_widget_data(filename, path)
 
-        if filename is None or filename[0] in self.widgets_name:
-            return  # TODO error
+        if filename[0] in self.widgets_name:
+            self.main_window_obj.show_error_dialog('Widget already exist')
+            return
+        if filename is None:
+            self.main_window_obj.show_error_dialog('Cant add that widget')
+            return
 
         widget = self.create_widget(filename[0], path)
         if widget is not None:
