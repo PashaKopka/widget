@@ -66,11 +66,7 @@ class WidgetAdder:
         """
         filename, path = self.__prepare_widget_data(filename, path)
 
-        if filename[0] in self.widgets_name:
-            self.main_window_obj.show_error_dialog('Widget already exist')
-            return
-        if filename is None:
-            self.main_window_obj.show_error_dialog('Cant add that widget')
+        if not self.__is_input_data_valid(filename):
             return
 
         widget = self.create_widget(filename[0], path)
@@ -80,13 +76,37 @@ class WidgetAdder:
             self.widgets_name.append(filename[0])
             self.add_widget_to_db(filename[0], path)
 
-            button = QPushButton(filename[0])
-            button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget, button))
-            button.setFont(QFont('MS Shell Dlg 2', 14))
-
+            button = self.__create_widget_button(filename, widget)
             self.main_window_obj.ui.widgets_layout.addWidget(button)
 
             return widget
+
+    def __create_widget_button(self, filename: list, widget: BaseWidget) -> QPushButton:
+        """
+        This function create button for widget displaying
+        :param filename: py-file name
+        :param widget: widget object
+        :return: button
+        """
+        button = QPushButton(filename[0])
+        button.clicked.connect(lambda: self.main_window_obj.double_click_event(widget, button))
+        button.setFont(QFont('MS Shell Dlg 2', 14))
+        return button
+
+    def __is_input_data_valid(self, filename: list) -> bool:
+        """
+        This function return True or False
+        check if data is valid
+        :param filename: name of py-file
+        :return: True or False
+        """
+        if filename[0] in self.widgets_name:
+            self.main_window_obj.show_error_dialog('Widget already exist')
+            return False
+        if filename is None:
+            self.main_window_obj.show_error_dialog('Cant add that widget')
+            return False
+        return True
 
     def get_db_rows(self) -> list:
         """
@@ -145,7 +165,13 @@ class WidgetAdder:
 
     @staticmethod
     def __copy_file(filename, path) -> str:
-        new_path = f'{settings.MAIN_DIRECTORY}\\ui\\user_ui\\{filename[0]}.py'
+        """
+        This function copy file select by user to directory: 'ui/user_ui/'
+        :param filename: py-file name
+        :param path: path to this file
+        :return:
+        """
+        new_path = f'{settings.MAIN_DIRECTORY}\\ui\\user_ui\\{filename[0]}.{filename[1]}'
         shutil.copyfile(path, new_path)
         return new_path
 
