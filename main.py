@@ -8,9 +8,9 @@ from PyQt5.QtCore import Qt
 
 from widget import settings
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QFont, QIcon
-from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon, QDialog
+from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon, QDialog, QMenu
 
 from widget.compile_ui import UiCompiler
 from widget.db_worker import DBWorker
@@ -214,6 +214,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tray_icon = QSystemTrayIcon()
         self.tray_icon.setIcon(self.main_icon)
         self.tray_icon.show()
+        self.tray_icon.activated.connect(self.tray_icon_click)
+        self.tray_context_menu = QMenu()
+        action = self.tray_context_menu.addAction('da')
+        self.tray_icon.setContextMenu(self.tray_context_menu)
+
+    def tray_icon_click(self, reason):
+        if reason == 2:  # double click
+            self.show()
 
     def __normalize_window(self) -> None:
         """
@@ -226,6 +234,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.setWindowTitle('Widget Manager')
         self.setWindowIcon(self.main_icon)
+
+        flags = QtCore.Qt.Tool
+        self.setWindowFlags(flags)
 
     def delete_button(self) -> None:
         """
