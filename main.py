@@ -43,7 +43,7 @@ class WidgetAdder:
     def __init__(self, main_window_obj: QtWidgets.QMainWindow) -> None:
         self.main_window_obj = main_window_obj
         self.db_worker = DBWorker()
-        self.widgets_name = []
+        self.widgets = []
 
     def visualise_widgets(self) -> None:
         """
@@ -73,7 +73,7 @@ class WidgetAdder:
         if widget is not None:
             if x is not None and y is not None:
                 widget.move(x, y)
-            self.widgets_name.append(filename[0])
+            self.widgets.append(widget)
             self.add_widget_to_db(filename[0], path)
 
             button = self.__create_widget_button(filename, widget)
@@ -136,12 +136,14 @@ class WidgetAdder:
         :param filename: name of py-file
         :return: True or False
         """
-        if filename[0] in self.widgets_name:
-            self.main_window_obj.show_error_dialog('Widget already exist')
-            return False
-        if filename is None:
-            self.main_window_obj.show_error_dialog('Cant add that widget')
-            return False
+        for widget in self.widgets:
+            print(widget.name, filename[0])
+            if widget.name == filename[0]:
+                self.main_window_obj.show_error_dialog('Widget already exist')
+                return False
+            if filename is None:
+                self.main_window_obj.show_error_dialog('Cant add that widget')
+                return False
         return True
 
     def __prepare_widget_data(self, filename=None, path=None) -> tuple:
@@ -217,11 +219,12 @@ class MainWindow(QtWidgets.QMainWindow):
         This function hide widget and button of this widget
         :return: None
         """
-        filename = self.selected_widget[0].text()
+        widget = self.selected_widget[1]
+        filename = widget.name
         self.db_worker.delete_row(filename)
         self.selected_widget[0].hide()
         self.selected_widget[1].hide()
-        self.widget_adder.widgets_name.remove(filename)
+        self.widget_adder.widgets.remove(widget)
 
     def double_click_event(self, widget: QtWidgets, button: QPushButton) -> None:
         """
