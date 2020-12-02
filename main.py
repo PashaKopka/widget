@@ -197,22 +197,35 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget_adder = WidgetAdder(main_window_obj=self)
         self.db_worker = DBWorker()
         self.selected_widget = ()
-        self.main_icon = QIcon(os.path.normpath(f'{settings.MAIN_DIRECTORY}/ui/res/logo.png'))
-        self.error_dialog_ui = Ui_Dialog()
 
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.setWindowTitle('Widget Manager')
-        self.setWindowIcon(self.main_icon)
-
-        self.tray_icon = QSystemTrayIcon()
-        self.tray_icon.setIcon(self.main_icon)
-        self.tray_icon.show()
+        self.__normalize_window()
+        self.__set_tray_icon()
 
         self.widget_adder.visualise_widgets()
 
         self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
         self.ui.del_widget_button.clicked.connect(lambda: self.delete_button())
+
+    def __set_tray_icon(self) -> None:
+        """
+        This function add tray icon and sets icon img
+        :return: None
+        """
+        self.tray_icon = QSystemTrayIcon()
+        self.tray_icon.setIcon(self.main_icon)
+        self.tray_icon.show()
+
+    def __normalize_window(self) -> None:
+        """
+        This function normalize window
+        :return: None
+        """
+        self.main_icon = QIcon(os.path.normpath(f'{settings.MAIN_DIRECTORY}/ui/res/logo.png'))
+        self.error_dialog_ui = Ui_Dialog()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.setWindowTitle('Widget Manager')
+        self.setWindowIcon(self.main_icon)
 
     def delete_button(self) -> None:
         """
