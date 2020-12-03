@@ -207,62 +207,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget_adder.visualise_widgets()
 
         self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
-        self.ui.del_widget_button.clicked.connect(lambda: self.delete_button())
-
-    def __set_tray_icon(self) -> None:
-        """
-        This function add tray icon and sets icon img
-        :return: None
-        """
-        self.tray_icon = QSystemTrayIcon()
-        self.tray_icon.setIcon(self.main_icon)
-        self.tray_icon.show()
-        self.tray_icon.activated.connect(self.tray_icon_click)
-        self.tray_context_menu = QMenu()
-        self.add_tray_actions()
-        self.tray_icon.setContextMenu(self.tray_context_menu)
-        self.tray_context_menu.triggered.connect(self.tray_menu_activation)
-
-    def add_tray_actions(self):
-        for action_data in self.tray_menu_actions:
-            action = self.tray_context_menu.addAction(action_data[0])
-            action_data.append(action)
-
-    def tray_menu_activation(self, action):
-        for action_data in self.tray_menu_actions:
-            if action is action_data[2]:
-                action_data[1]()
-
-    def tray_icon_click(self, reason):
-        if reason == 2:  # double click
-            self.show()
-
-    def __normalize_window(self) -> None:
-        """
-        This function normalize window
-        :return: None
-        """
-        self.main_icon = QIcon(os.path.normpath(f'{settings.MAIN_DIRECTORY}/ui/res/logo.png'))
-        self.error_dialog_ui = Ui_Dialog()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.setWindowTitle('Widget Manager')
-        self.setWindowIcon(self.main_icon)
-
-        flags = QtCore.Qt.Tool
-        self.setWindowFlags(flags)
-
-    def delete_button(self) -> None:
-        """
-        This function hide widget and button of this widget
-        :return: None
-        """
-        widget = self.selected_widget[1]
-        filename = widget.name
-        self.db_worker.delete_row(filename)
-        self.selected_widget[0].hide()
-        self.selected_widget[1].hide()
-        self.widget_adder.widgets.remove(widget)
+        self.ui.del_widget_button.clicked.connect(lambda: self.__delete_button())
 
     def double_click_event(self, widget: QtWidgets, button: QPushButton) -> None:
         """
@@ -306,6 +251,75 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.setWindowTitle('Dialog')
         dialog.setWindowModality(Qt.ApplicationModal)
         dialog.exec_()
+
+    def __set_tray_icon(self) -> None:
+        """
+        This function add tray icon and sets icon img
+        :return: None
+        """
+        self.tray_icon = QSystemTrayIcon()
+        self.tray_icon.setIcon(self.main_icon)
+        self.tray_icon.show()
+        self.tray_icon.activated.connect(self.__tray_icon_click)
+        self.tray_context_menu = QMenu()
+        self.__add_tray_actions()
+        self.tray_icon.setContextMenu(self.tray_context_menu)
+        self.tray_context_menu.triggered.connect(self.___tray_menu_activation)
+
+    def __add_tray_actions(self) -> None:
+        """
+        This function add actions to the tray context menu
+        :return: None
+        """
+        for action_data in self.tray_menu_actions:
+            action = self.tray_context_menu.addAction(action_data[0])
+            action_data.append(action)
+
+    def ___tray_menu_activation(self, action) -> None:
+        """
+        This function check for action and call it
+        :param action: action object
+        :return: None
+        """
+        for action_data in self.tray_menu_actions:
+            if action is action_data[2]:
+                action_data[1]()
+
+    def __tray_icon_click(self, reason: int) -> None:
+        """
+        This function check for click on tray icon
+        :param reason: This is integer that shows what button was clicked
+        :return: None
+        """
+        if reason == 2:  # double click
+            self.show()
+
+    def __normalize_window(self) -> None:
+        """
+        This function normalize window
+        :return: None
+        """
+        self.main_icon = QIcon(os.path.normpath(f'{settings.MAIN_DIRECTORY}/ui/res/logo.png'))
+        self.error_dialog_ui = Ui_Dialog()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.setWindowTitle('Widget Manager')
+        self.setWindowIcon(self.main_icon)
+
+        flags = QtCore.Qt.Tool
+        self.setWindowFlags(flags)
+
+    def __delete_button(self) -> None:
+        """
+        This function hide widget and button of this widget
+        :return: None
+        """
+        widget = self.selected_widget[1]
+        filename = widget.name
+        self.db_worker.delete_row(filename)
+        self.selected_widget[0].hide()
+        self.selected_widget[1].hide()
+        self.widget_adder.widgets.remove(widget)
 
     @staticmethod
     def display_widget(widget: BaseWidget, button=None) -> None:
