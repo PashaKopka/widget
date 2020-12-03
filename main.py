@@ -197,6 +197,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget_adder = WidgetAdder(main_window_obj=self)
         self.db_worker = DBWorker()
         self.selected_widget = ()
+        self.tray_menu_actions = [
+            ['close', self.close]
+        ]
 
         self.__normalize_window()
         self.__set_tray_icon()
@@ -216,8 +219,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tray_icon.show()
         self.tray_icon.activated.connect(self.tray_icon_click)
         self.tray_context_menu = QMenu()
-        action = self.tray_context_menu.addAction('da')
+        self.add_tray_actions()
         self.tray_icon.setContextMenu(self.tray_context_menu)
+        self.tray_context_menu.triggered.connect(self.tray_menu_activation)
+
+    def add_tray_actions(self):
+        for action_data in self.tray_menu_actions:
+            action = self.tray_context_menu.addAction(action_data[0])
+            action_data.append(action)
+
+    def tray_menu_activation(self, action):
+        for action_data in self.tray_menu_actions:
+            if action is action_data[2]:
+                action_data[1]()
 
     def tray_icon_click(self, reason):
         if reason == 2:  # double click
@@ -272,14 +286,13 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         self.db_worker.toggle_visibility(button.text())
 
-    def close(self) -> bool:
+    def close(self) -> None:
         """
         This is override function that calls when window is closing
-        :return: boolean property
+        :return: None
         """
-        prop = super().close()
         self.tray_icon.hide()
-        return prop
+        sys.exit(app.exec())
 
     def show_error_dialog(self, message: str) -> None:
         """
