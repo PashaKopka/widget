@@ -22,7 +22,7 @@ class BaseWidget(QtWidgets.QMainWindow):
         self.menu.setStyleSheet('QMenu{color : white;}')
         self.actions = {
             'move center': self.move_window_center,
-            'pin': self.pin
+            'pin': self.toggle_pinned_value
         }
         self._create_context_menu()
 
@@ -44,13 +44,16 @@ class BaseWidget(QtWidgets.QMainWindow):
             y = self.y()
             self.db_worker.add_coordinate(self.name, x, y)
 
-    def pin(self):
+    def toggle_pinned_value(self):
+        # TODO docs
         if self.draggable:
             self.draggable = False
         else:
             self.draggable = True
+        self._toggle_db_pinned_value()
 
     def move_window_center(self):
+        # TODO docs
         frame_gm = self.frameGeometry()
         screen = PyQt5.QtWidgets.QApplication.desktop().screenNumber(
             PyQt5.QtWidgets.QApplication.desktop().cursor().pos())
@@ -91,6 +94,13 @@ class BaseWidget(QtWidgets.QMainWindow):
         flags |= QtCore.Qt.WindowStaysOnBottomHint
         self.setWindowFlags(flags)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+
+    def _toggle_db_pinned_value(self) -> None:
+        """
+        This function toggle pinned value in database
+        :return: None
+        """
+        self.db_worker.toggle_pinned_value(self.name)
 
     @staticmethod
     def _stay_at_all_virtual_desktops():

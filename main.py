@@ -53,12 +53,16 @@ class WidgetAdder:
         rows = self.get_db_rows()
         for row in rows:
             if row['visible'] and not row['del']:  # if visible == True and del == False
-                widget = self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'])
+                widget = self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'],
+                                         pinned=row['pinned'])
                 self.main_window_obj.display_widget(widget=widget)
             elif not row['del']:
-                self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'])
+                widget = self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'],
+                                         pinned=row['pinned'])
+            if row['pinned']:
+                widget.toggle_pinned_value()
 
-    def add_widget(self, filename=None, path=None, x=None, y=None):
+    def add_widget(self, filename=None, path=None, x=None, y=None, pinned=None):
         """
         This function adding pushButton to ScrollBar and
         create function for activating this button
