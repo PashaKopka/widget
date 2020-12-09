@@ -23,9 +23,6 @@ class DBWorker:
         self.db_name = db_name
         self.host = host
 
-        # self.connection = pymysql.connect(host, username, password, db_name)
-        # self.cursor = self.connection.cursor()
-
     def add_row(self, filename: str, path: str) -> None:
         """
         This function adding row in select table
@@ -125,8 +122,10 @@ class DBWorker:
                 'path': row[2],
                 'x': row[3],
                 'y': row[4],
-                'visible': row[5],
-                'del': row[6]
+                'params': row[5],
+                'pinned': row[6],
+                'visible': row[7],
+                'del': row[8]
             }
             data.append(_row)
 

@@ -198,7 +198,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.db_worker = DBWorker()
         self.selected_widget = ()
         self.tray_menu_actions = [
-            ['close', self.close]
+            ['hide all widgets', self.hide_all_widgets],
+            ['close', self.close],
+            # ['last widgets', self.__show_last_widgets_menu]
         ]
 
         self.__normalize_window()
@@ -209,12 +211,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
         self.ui.del_widget_button.clicked.connect(lambda: self.__delete_button())
 
+    def hide_all_widgets(self) -> None:
+        """
+        This function hide all widgets that are on screen
+        :return: None
+        """
+        for widget in self.widget_adder.widgets:
+            widget.hide()
+
     def double_click_event(self, widget: QtWidgets, button: QPushButton) -> None:
         """
         This function check: is click double or not
         :param button: selected button
         :param widget: widget, that will be displayed
-        :return:
+        :return: None
         """
         if (time.time() - self.click_time) < .5:
             self.display_widget(widget=widget, button=button)
