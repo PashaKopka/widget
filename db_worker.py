@@ -82,6 +82,11 @@ class DBWorker:
             self.__call_cursor(f'UPDATE user_widgets_table SET visible=1 WHERE filename="{filename}"')
 
     def toggle_pinned_value(self, filename: str) -> None:
+        """
+        This function toggle pinned value in database
+        :param filename: name of widget
+        :return: None
+        """
         self.__call_cursor(f'SELECT pinned FROM user_widgets_table WHERE filename="{filename}"')
         pinned = self.cursor.fetchall()[0][0]
         if pinned:

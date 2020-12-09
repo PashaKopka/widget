@@ -33,6 +33,7 @@ class BaseWidget(QtWidgets.QMainWindow):
     def move_window(self, e) -> None:
         """
         This is override function that add coordinates of widget in database and move widget
+
         :param e: -
         :return: None
         """
@@ -44,16 +45,25 @@ class BaseWidget(QtWidgets.QMainWindow):
             y = self.y()
             self.db_worker.add_coordinate(self.name, x, y)
 
-    def toggle_pinned_value(self):
-        # TODO docs
+    def toggle_pinned_value(self) -> None:
+        """
+        This function toggle pinned value of widget and call function
+        that toggle pinned value in database
+
+        :return: None
+        """
         if self.draggable:
             self.draggable = False
         else:
             self.draggable = True
         self._toggle_db_pinned_value()
 
-    def move_window_center(self):
-        # TODO docs
+    def move_window_center(self) -> None:
+        """
+        This function move widget on the center of active screen
+
+        :return: None
+        """
         frame_gm = self.frameGeometry()
         screen = PyQt5.QtWidgets.QApplication.desktop().screenNumber(
             PyQt5.QtWidgets.QApplication.desktop().cursor().pos())
@@ -66,12 +76,24 @@ class BaseWidget(QtWidgets.QMainWindow):
     def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
         """
         Function for handling mouse click event
+
         :param a0:
         :return: None
         """
         self.click_position = a0.globalPos()
 
-    def set_timer(self, method, timeout):
+    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+        """
+        Function toggle draggable of window
+
+        :param event: choice button of context menu
+        :return:
+        """
+        action = self.menu.exec_(self.mapToGlobal(event.pos()))
+        if action:
+            self.actions[action.text()]()
+
+    def set_timer(self, method, timeout) -> None:
         """
         Function make QTimer for other method
 
@@ -83,10 +105,11 @@ class BaseWidget(QtWidgets.QMainWindow):
         timer.timeout.connect(method)
         timer.start(timeout)
 
-    def _normalize_window(self):
+    def _normalize_window(self) -> None:
         """
         Function make background of program transparent
         and set window always on bottom
+
         :return: None
         """
         flags = QtCore.Qt.FramelessWindowHint
@@ -98,35 +121,28 @@ class BaseWidget(QtWidgets.QMainWindow):
     def _toggle_db_pinned_value(self) -> None:
         """
         This function toggle pinned value in database
+
         :return: None
         """
         self.db_worker.toggle_pinned_value(self.name)
 
-    @staticmethod
-    def _stay_at_all_virtual_desktops():
-        """
-        Function make window visible at all virtual desktops
-        (tested only on windows 10)
-        :return:
-        """
-        current_desktop = pyvda.GetCurrentDesktopNumber()
-        current_window_handle = win32gui.GetForegroundWindow()
-        pyvda.MoveWindowToDesktopNumber(current_window_handle, current_desktop)
-
-    def _create_context_menu(self):
+    def _create_context_menu(self) -> None:
         """
         This function create actions for context menu
+
         :return:
         """
         for action in self.actions:
             self.menu.addAction(action)
 
-    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+    @staticmethod
+    def _stay_at_all_virtual_desktops() -> None:
         """
-        Function toggle draggable of window
-        :param event: choice button of context menu
+        Function make window visible at all virtual desktops
+        (tested only on windows 10)
+
         :return:
         """
-        action = self.menu.exec_(self.mapToGlobal(event.pos()))
-        if action:
-            self.actions[action.text()]()
+        current_desktop = pyvda.GetCurrentDesktopNumber()
+        current_window_handle = win32gui.GetForegroundWindow()
+        pyvda.MoveWindowToDesktopNumber(current_window_handle, current_desktop)
