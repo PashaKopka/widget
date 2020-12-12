@@ -8,9 +8,9 @@ from PyQt5.QtCore import Qt
 
 from widget import settings
 
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QFont, QIcon
-from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon, QDialog, QMenu
+from PyQt5.QtWidgets import QFileDialog, QPushButton, QSystemTrayIcon, QDialog, QMenu, QAction
 
 from widget.compile_ui import UiCompiler
 from widget.db_worker import DBWorker
@@ -205,13 +205,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tray_menu_actions = [
             ['hide all widgets', self.hide_all_widgets],
             ['close', self.close],
-            # ['last widgets', self.__show_last_widgets_menu]
         ]
 
         self.__normalize_window()
-        self.__set_tray_icon()
 
         self.widget_adder.visualise_widgets()
+
+        self.__set_tray_icon()
 
         self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
         self.ui.del_widget_button.clicked.connect(lambda: self.__delete_button())
@@ -232,7 +232,7 @@ class MainWindow(QtWidgets.QMainWindow):
         :return: None
         """
         if (time.time() - self.click_time) < .5:
-            self.display_widget(widget=widget, button=button)
+            self.display_widget(widget=widget)
             self.toggle_visibility_db(button)
         else:
             self.click_time = time.time()
@@ -252,6 +252,9 @@ class MainWindow(QtWidgets.QMainWindow):
         :return: None
         """
         self.tray_icon.hide()
+        for widget in self.widget_adder.widgets:
+            widget.close()
+
         sys.exit(app.exec())
 
     def show_error_dialog(self, message: str) -> None:
@@ -266,6 +269,37 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.setWindowTitle('Dialog')
         dialog.setWindowModality(Qt.ApplicationModal)
         dialog.exec_()
+
+    def display_widget(self, widget: BaseWidget) -> None:
+        """
+        display the widget on users screen
+        :param widget: widget, that will be displayed
+        :return: None
+        """
+        if isinstance(widget, QAction):
+            for _widget in self.widget_adder.widgets:
+                if widget.text() == _widget.name:
+                    widget = _widget
+
+        if not widget.isVisible():
+            widget.show()
+        else:
+            widget.hide()
+
+    def __add_last_widgets_menu(self) -> None:
+        """
+        This function add last widget menu to tray menu
+
+        :return: None
+        """
+        last_widgets_menu = QMenu(self.tray_context_menu)
+        last_widgets_menu.setTitle('last widgets')
+
+        for widget in self.widget_adder.widgets:
+            last_widgets_menu.addAction(widget.name)
+
+        last_widgets_menu.triggered.connect(self.display_widget)
+        self.tray_context_menu.addMenu(last_widgets_menu)
 
     def __set_tray_icon(self) -> None:
         """
@@ -289,6 +323,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for action_data in self.tray_menu_actions:
             action = self.tray_context_menu.addAction(action_data[0])
             action_data.append(action)
+        self.__add_last_widgets_menu()
 
     def ___tray_menu_activation(self, action) -> None:
         """
@@ -308,6 +343,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         if reason == 2:  # double click
             self.show()
+            self.activateWindow()
 
     def __normalize_window(self) -> None:
         """
@@ -335,19 +371,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.selected_widget[0].hide()
         self.selected_widget[1].hide()
         self.widget_adder.widgets.remove(widget)
-
-    @staticmethod
-    def display_widget(widget: BaseWidget, button=None) -> None:
-        """
-        display the widget on users screen
-        :param button: pressed button
-        :param widget: widget, that will be displayed
-        :return: None
-        """
-        if not widget.isVisible():
-            widget.show()
-        elif button is not None:
-            widget.hide()
 
 
 if __name__ == '__main__':
