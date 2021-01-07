@@ -54,16 +54,14 @@ class WidgetAdder:
         for row in rows:
             widget = None
             if row['visible'] and not row['del']:  # if visible == True and del == False
-                widget = self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'],
-                                         pinned=row['pinned'])
+                widget = self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'])
                 self.main_window_obj.display_widget(widget=widget)
             elif not row['del']:
-                widget = self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'],
-                                         pinned=row['pinned'])
+                widget = self.add_widget(filename=row['filename'], path=row['path'], x=row['x'], y=row['y'])
             if widget is not None and row['pinned']:
                 widget.toggle_pinned_value()
 
-    def add_widget(self, filename=None, path=None, x=None, y=None, pinned=None):
+    def add_widget(self, filename=None, path=None, x=None, y=None,):
         """
         This function adding pushButton to ScrollBar and
         create function for activating this button
@@ -76,13 +74,13 @@ class WidgetAdder:
 
         widget = self.create_widget(filename[0], path)
         if widget is not None:
-            if x is not None and y is not None:
-                widget.move(x, y)
-            self.widgets.append(widget)
-            self.add_widget_to_db(filename[0], path)
+            # if x is not None and y is not None:
+            #     widget.move(x, y)
+            # self.widgets.append(widget)
+            # self.add_widget_to_db(filename[0], path)
 
-            button = self.__create_widget_button(filename, widget)
-            self.main_window_obj.ui.widgets_layout.addWidget(button)
+            # button = self.__create_widget_button(filename, widget)
+            # self.main_window_obj.ui.widgets_layout.addWidget(button)
 
             return widget
 
@@ -111,16 +109,17 @@ class WidgetAdder:
         :param path: path to file
         :return: widget class with design UI_Form
         """
-        module_importer = importlib.util.spec_from_file_location(filename, path)
-        module = importlib.util.module_from_spec(module_importer)
-        module_importer.loader.exec_module(module)
+        pass
+        # module_importer = importlib.util.spec_from_file_location(filename, path)
+        # module = importlib.util.module_from_spec(module_importer)
+        # module_importer.loader.exec_module(module)
 
-        if hasattr(module, 'main'):
-            return module.main()
-        elif hasattr(module, 'Ui_Form'):
-            return NewWidget(module.Ui_Form, filename)
-        else:
-            self.main_window_obj.show_error_dialog('Must be Ui_Form in py-file')
+        # if hasattr(module, 'main'):
+        #     return module.main()
+        # elif hasattr(module, 'Ui_Form'):
+        #     return NewWidget(module.Ui_Form, filename)
+        # else:
+        #     self.main_window_obj.show_error_dialog('Must be Ui_Form in py-file')
 
     def __create_widget_button(self, filename: list, widget: BaseWidget) -> QPushButton:
         """
@@ -213,7 +212,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.__set_tray_icon()
 
-        self.ui.add_widget_button.clicked.connect(self.widget_adder.add_widget)
+        self.ui.add_widget_button.clicked.connect(self.__add_widget)
         self.ui.del_widget_button.clicked.connect(lambda: self.__delete_button())
 
     def hide_all_widgets(self) -> None:
@@ -285,6 +284,9 @@ class MainWindow(QtWidgets.QMainWindow):
             widget.show()
         else:
             widget.hide()
+
+    def __add_widget(self):
+        widget = self.widget_adder.add_widget()
 
     def __add_last_widgets_menu(self) -> None:
         """

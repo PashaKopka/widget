@@ -145,4 +145,4 @@ class BaseWidget(QtWidgets.QMainWindow):
         """
         current_desktop = pyvda.GetCurrentDesktopNumber()
         current_window_handle = win32gui.GetForegroundWindow()
-        pyvda.MoveWindowToDesktopNumber(current_window_handle, current_desktop)
+        # pyvda.MoveWindowToDesktopNumber(current_window_handle, current_desktop)
